@@ -101,6 +101,17 @@ public:
 		return size;
 	}
 
+	int emptyNumber() {
+		int empty_spots = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (board[i][j] == ' ')
+					empty_spots++;
+			}
+		}
+		return empty_spots;
+	}
+
 	bool isBoardCorrect() {
 		return ((rpawns - 1 == bpawns) || (rpawns == bpawns));
 	}
@@ -138,10 +149,7 @@ public:
 		return false;
 	}
 
-	int isGameOver() {
-		if (!isBoardCorrect())
-			return 0;
-
+	int checkWin() {
 		int checkedPosBoard[MAX_SIZE][MAX_SIZE];
 
 		//check for red
@@ -171,6 +179,13 @@ public:
 		}
 
 		return 0;
+	}
+
+	int isGameOver() {
+		if (!isBoardCorrect())
+			return 0;
+
+		return checkWin();
 	}
 
 	bool isBoardPossible() {
@@ -213,7 +228,7 @@ public:
 		}
 		return false;
 	}
-
+	
 	int whose_turn() {
 		if (rpawns == bpawns)
 			return RED;
@@ -222,27 +237,65 @@ public:
 		return 0;
 	}
 
-	bool winNaive(char color, int n) {
+	bool winNaive(int color, int n) {
+
 		if (!isBoardPossible())
 			return false;
 		else if (isGameOver())
 			return false;
 
-		int empty_spots = 0;
+		if (whose_turn() != color && emptyNumber() == 1)
+			return false;
+
+		char pawn;
+		int moves = 1;
+		if (color == RED)
+			pawn = 'r';
+		else
+			pawn = 'b';
+
+		if (whose_turn() == color && n == 1)
+			moves = 1;
+		else if (whose_turn() != color && n == 1)
+			moves = 2;
+		else if (whose_turn() == color && n == 2)
+			moves = 3;
+		else if (whose_turn() != color && n == 2)
+			moves = 4;
+
+		if (moves > emptyNumber())
+			return false;
+
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				if (board[i][j] == ' ')
-					empty_spots++;
+				if (board[i][j] == ' ') {
+					board[i][j] = pawn;
+					moves -= 2;
+					if (checkWin() == color) {
+						board[i][j] = ' ';
+						if (n == 1)
+							return true;
+					}
+					else if (n == 2 && emptyNumber() - 1 >= moves) {
+						for (int x = 0; x < size; x++) {
+							for (int y = 0; y < size; y++) {
+								if (board[x][y] == ' ') {
+									board[x][y] = pawn;
+									if (checkWin() == color) {
+										board[i][j] = ' ';
+										board[x][y] = ' ';
+										return true;
+									}
+									board[x][y] = ' ';
+								}
+							}
+						}
+					}
+					board[i][j] = ' ';
+				}
 			}
 		}
-
-		if (whose_turn() == RED) {
-			if (color == 'b' && empty_spots == 1)
-				return false;
-		}
-		else if (whose_turn() == BLUE) {
-
-		}
+		return false;
 	}
 };
 
@@ -286,25 +339,25 @@ int main() {
 				std::cout << "NO\n";
 		}
 		else if (command == "CAN_RED_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") {
-			if(board.winNaive('r', 1 ))
+			if(board.winNaive(RED, 1 ))
 				std::cout << "YES\n";
 			else
 				std::cout << "NO\n";
 		}
 		else if (command == "CAN_BLUE_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") {
-			if (board.winNaive('b', 1))
+			if (board.winNaive(BLUE, 1))
 				std::cout << "YES\n";
 			else
 				std::cout << "NO\n";
 		}
 		else if (command == "CAN_RED_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT") {
-			if (board.winNaive('r', 2))
+			if (board.winNaive(RED, 2))
 				std::cout << "YES\n";
 			else
 				std::cout << "NO\n";
 		}
 		else if (command == "CAN_BLUE_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT") {
-			if (board.winNaive('b', 2))
+			if (board.winNaive(BLUE, 2))
 				std::cout << "YES\n";
 			else
 				std::cout << "NO\n";
@@ -312,6 +365,7 @@ int main() {
 	}
 	return 0;
 }
+
 
 /*
 TODO List:
