@@ -173,6 +173,9 @@ public:
 		return 0;
 	}
 
+	bool isBoardPossible() {
+		return true;
+	}
 };
 
 
@@ -205,16 +208,18 @@ int main() {
 			else
 				std::cout << "NO\n";
 		}
+		else if (command == "IS_BOARD_POSSIBLE") {
+			if (board.isBoardPossible())
+				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
 	}
 	return 0;
 }
 
 /*
 TODO List:
-(8 %)	BOARD_SIZE - (test 1)
-(8 %)	PAWNS_NUMBER - (test 2)
-(8 %)	IS_BOARD_CORRECT - (test 3)
-(20 %)	IS_GAME_OVER - (test 4)
 (20 %)	IS_BOARD_POSSIBLE - (test 5)
 (20 %)	CAN_RED_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT - (test 6)
 		CAN_BLUE_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT
