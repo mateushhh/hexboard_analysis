@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #define MAX_SIZE 11
+#define RED 1
+#define BLUE 2
 
 class Board {
 public:
@@ -10,6 +12,16 @@ public:
 	int size;
 	int bpawns;
 	int rpawns;
+
+	Board() {
+		size = 1;
+		bpawns = 0;
+		rpawns = 0;
+		for (int i = 0; i < MAX_SIZE; i++) {
+			for (int j = 0; j < MAX_SIZE; j++)
+				board[i][j] = ' ';
+		}
+	}
 
 	int columnCounter(std::string line) {
 		int columnCounter = 0;
@@ -92,6 +104,75 @@ public:
 	bool isBoardCorrect() {
 		return ((rpawns - 1 == bpawns) || (rpawns == bpawns));
 	}
+
+	bool lookForPath(char color, int i, int j, int(*checkedPosBoard)[MAX_SIZE]) {
+		checkedPosBoard[i][j] = 1;
+
+		//end checks
+		if (board[i][j] != color)
+			return false;
+		else if (j == size - 1 && color == 'r')
+			return true;
+		else if (i == size - 1 && color == 'b')
+			return true;
+
+		//check for all neighbours
+		if (i - 1 >= 0 && j - 1 >= 0 && checkedPosBoard[i - 1][j - 1] == 0) {
+			if (lookForPath(color, i - 1, j - 1, checkedPosBoard)) { return true; }
+		}
+		if (i - 1 >= 0 && j >= 0 && checkedPosBoard[i - 1][j] == 0) {
+			if (lookForPath(color, i - 1, j, checkedPosBoard)) { return true; }
+		}
+		if (i >= 0 && j - 1 >= 0 && checkedPosBoard[i][j - 1] == 0) {
+			if (lookForPath(color, i, j - 1, checkedPosBoard)) { return true; }
+		}
+		if (i >= 0 && j + 1 < size && checkedPosBoard[i][j + 1] == 0) {
+			if (lookForPath(color, i, j + 1, checkedPosBoard)) { return true; }
+		}
+		if (i + 1 < size && j >= 0 && checkedPosBoard[i + 1][j] == 0) {
+			if (lookForPath(color, i + 1, j, checkedPosBoard)) { return true; }
+		}
+		if (i + 1 < size && j + 1 < size && checkedPosBoard[i + 1][j + 1] == 0) {
+			if (lookForPath(color, i + 1, j + 1, checkedPosBoard)) { return true; }
+		}
+		return false;
+	}
+
+	int isGameOver() {
+		if (!isBoardCorrect())
+			return 0;
+
+		int checkedPosBoard[MAX_SIZE][MAX_SIZE];
+
+		//check for red
+		for (int i = 0; i < MAX_SIZE; i++) {
+			for (int j = 0; j < MAX_SIZE; j++)
+				checkedPosBoard[i][j] = 0;
+		}
+
+		for (int i = 0; i < size; i++) {
+			if (board[i][0] == 'r') {
+				if (this->lookForPath('r', i, 0, checkedPosBoard))
+					return RED;
+			}
+		}
+
+		//check for blue
+		for (int i = 0; i < MAX_SIZE; i++) {
+			for (int j = 0; j < MAX_SIZE; j++)
+				checkedPosBoard[i][j] = 0;
+		}
+
+		for (int j = 0; j < size; j++) {
+			if (board[0][j] == 'b') {
+				if (this->lookForPath('b', 0, j, checkedPosBoard))
+					return BLUE;
+			}
+		}
+
+		return 0;
+	}
+
 };
 
 
@@ -112,6 +193,15 @@ int main() {
 		else if (command == "IS_BOARD_CORRECT") {
 			if (board.isBoardCorrect())
 				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
+		else if (command == "IS_GAME_OVER") {
+			if (board.isGameOver())
+				if (board.isGameOver() == RED)
+					std::cout << "YES RED\n";
+				else
+					std::cout << "YES BLUE\n";
 			else
 				std::cout << "NO\n";
 		}
@@ -137,9 +227,9 @@ TODO List:
 
 	   ---
 	--< r >--
- --< b >-<   >--
-<   >-< b >-<   >
- --<   >-< r >--
-	--< r >--
+ --< b >-< b >--
+<   >-< r >-<   >
+ --< r >-< r >--
+	--< b >--
 	   ---
 */
