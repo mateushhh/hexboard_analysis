@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <algorithm>
 
@@ -174,11 +174,79 @@ public:
 	}
 
 	bool isBoardPossible() {
-		return true;
+		if (!isBoardCorrect())
+			return false;
+		if (!isGameOver()) {
+			return true;
+		}
+		if (isGameOver() == RED) {
+			if (rpawns - 1 != bpawns)
+				return false;
+			for (int i = 0; i < MAX_SIZE; i++) {
+				for (int j = 0; j < MAX_SIZE; j++) {
+					if (board[i][j] == 'r') {
+						board[i][j] = ' ';
+						if (!isGameOver()) {
+							board[i][j] = 'r';
+							return true;
+						}
+						board[i][j] = 'r';
+					}
+				}
+			}
+		}
+		if (isGameOver() == BLUE) {
+			if (rpawns != bpawns)
+				return false;
+			for (int i = 0; i < MAX_SIZE; i++) {
+				for (int j = 0; j < MAX_SIZE; j++) {
+					if (board[i][j] == 'b') {
+						board[i][j] = ' ';
+						if (!isGameOver()) {
+							board[i][j] = 'b';
+							return true;
+						}
+						board[i][j] = 'b';
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	int whose_turn() {
+		if (rpawns == bpawns)
+			return RED;
+		else if (rpawns - 1 == bpawns)
+			return BLUE;
+		return 0;
+	}
+
+	bool winNaive(char color, int n) {
+		if (!isBoardPossible())
+			return false;
+		else if (isGameOver())
+			return false;
+
+		int empty_spots = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (board[i][j] == ' ')
+					empty_spots++;
+			}
+		}
+
+		if (whose_turn() == RED) {
+			if (color == 'b' && empty_spots == 1)
+				return false;
+		}
+		else if (whose_turn() == BLUE) {
+
+		}
 	}
 };
 
-
+ 
 int main() {
 	Board board;
 	std::string command;
@@ -189,10 +257,13 @@ int main() {
 			board.read();
 		else if (command == "DRAW")
 			board.draw();
-		else if (command == "BOARD_SIZE")
+
+		else if (command == "BOARD_SIZE") {
 			std::cout << board.boardSize() << '\n';
-		else if (command == "PAWNS_NUMBER")
+		}
+		else if (command == "PAWNS_NUMBER") {
 			std::cout << board.pawnsNumber() << '\n';
+		}
 		else if (command == "IS_BOARD_CORRECT") {
 			if (board.isBoardCorrect())
 				std::cout << "YES\n";
@@ -210,6 +281,30 @@ int main() {
 		}
 		else if (command == "IS_BOARD_POSSIBLE") {
 			if (board.isBoardPossible())
+				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
+		else if (command == "CAN_RED_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") {
+			if(board.winNaive('r', 1 ))
+				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
+		else if (command == "CAN_BLUE_WIN_IN_1_MOVE_WITH_NAIVE_OPPONENT") {
+			if (board.winNaive('b', 1))
+				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
+		else if (command == "CAN_RED_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT") {
+			if (board.winNaive('r', 2))
+				std::cout << "YES\n";
+			else
+				std::cout << "NO\n";
+		}
+		else if (command == "CAN_BLUE_WIN_IN_2_MOVES_WITH_NAIVE_OPPONENT") {
+			if (board.winNaive('b', 2))
 				std::cout << "YES\n";
 			else
 				std::cout << "NO\n";
